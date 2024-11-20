@@ -19,6 +19,6 @@ dependencies = {
 build = {
     type = "builtin",
     modules = {
-        ["day01"] = "src/day01.lua"
+        ["*"] = "src/*.lua"
     }
 }
