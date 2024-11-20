@@ -1,4 +1,4 @@
-.PHONY: test install clean
+.PHONY: clean install test
 
 test:
 	lua tests/day01_test.lua
