@@ -17,8 +17,13 @@ dependencies = {
 }
 
 build = {
-    type = "builtin",
-    modules = {
-        ["*"] = "src/*.lua"
-    }
+   type = "builtin",
+   modules = (function()
+      local modules = {}
+      for file in io.popen("find src -name '*.lua'"):lines() do
+         local module_name = file:gsub("^src/", ""):gsub("%.lua$", ""):gsub("/", ".")
+         modules[module_name] = file
+      end
+      return modules
+   end)()
 }
