@@ -20,5 +20,6 @@ build = {
    type = "builtin",
    modules = {
        ["aoc2024.Day01"] = "src/day01.lua"
+       ["aoc2024.Day02"] = "src/day02.lua"
    }
 }
