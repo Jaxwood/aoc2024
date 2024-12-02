@@ -33,22 +33,14 @@ function decending(current, previous)
     return true
 end
 
-function check(comparer, report, allowedFailures)
+function check(comparer, report)
     for idx = 2, #report do
         local current = report[idx]
         local previous = report[idx - 1]
-        local failures = 0
         if not comparer(current, previous) then
-            failures = failures + 1
-            if failures > allowedFailures then
-                return false
-            end
-        end
-        if outsideRange(current, previous) then
-            failures = failures + 1
-            if failures > allowedFailures then
-                return false
-            end
+            return false
+        elseif outsideRange(current, previous) then
+            return false
         end
     end
     return true
@@ -57,17 +49,16 @@ end
 function Day02.part1(content)
     local valid = 0
     local reports = parse(content)
-    local allowedFailures = 0
 
     for _, report in ipairs(reports) do
         local idx = 2
         -- check if accending or decending order
         if report[idx - 1] < report[idx] then
-            if check(ascending, report, allowedFailures) then
+            if check(ascending, report) then
                 valid = valid + 1
             end
         elseif report[idx - 1] > report[idx] then
-            if check(decending, report, allowedFailures) then
+            if check(decending, report) then
                 valid = valid + 1
             end
         end
@@ -77,3 +68,4 @@ function Day02.part1(content)
 end
 
 return Day02
+
