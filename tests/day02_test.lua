@@ -29,7 +29,7 @@ end
 
 function TestLibrary.test_part2()
     local content = readFile("data/day02.txt")
-    lu.assertEquals(Day02.part2(content), 662) -- 662 too high, 649 too low
+    lu.assertEquals(Day02.part2(content), 658)
 end
 
 os.exit(lu.LuaUnit.run())

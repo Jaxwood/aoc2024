@@ -14,36 +14,56 @@ function parse(content)
     return reports
 end
 
-function outsideRange(current, previous)
-    local diff = math.abs(previous - current)
-    return diff < 1 or diff > 3
-end
+function isSafe(report)
+    local increasing = false
 
-function ascending(current, previous)
-    if previous >= current then
-        return false
-    end
-    return true
-end
-
-function decending(current, previous)
-    if previous <= current then
-        return false
-    end
-    return true
-end
-
-function check(comparer, report)
-    for idx = 2, #report do
-        local current = report[idx]
-        local previous = report[idx - 1]
-        if not comparer(current, previous) then
-            return false, idx
-        elseif outsideRange(current, previous) then
-            return false, idx
+    for idx = 1, #report do
+        if idx == 1 then
+            if report[2] > report[1] then
+                increasing = true
+            else
+                increasing = false
+            end
+        else
+            if (increasing and report[idx - 1] > report[idx]) or (not increasing and report[idx - 1] < report[idx]) then
+                return false
+            end
+            if math.abs(report[idx - 1] - report[idx]) < 1 or math.abs(report[idx - 1] - report[idx]) > 3 then
+                return false
+            end
         end
     end
-    return true, nil
+
+    return true;
+end
+
+function shallowCopy(original)
+    local copy = {}
+    for key, value in pairs(original) do
+        copy[key] = value
+    end
+    return copy
+end
+
+function countSafe(reports)
+    local count = 0;
+
+    for _, report in ipairs(reports) do
+        if isSafe(report) then
+            count = count + 1
+        else
+            for i = 1, #report do
+                local copy = shallowCopy(report)
+                table.remove(copy, i)
+                if isSafe(copy) then
+                    count = count + 1
+                    break
+                end
+            end
+        end
+    end
+
+    return count
 end
 
 function Day02.part1(content)
@@ -51,16 +71,8 @@ function Day02.part1(content)
     local reports = parse(content)
 
     for _, report in ipairs(reports) do
-        local idx = 2
-        -- check if accending or decending order
-        if report[idx - 1] < report[idx] then
-            if check(ascending, report) then
-                valid = valid + 1
-            end
-        elseif report[idx - 1] > report[idx] then
-            if check(decending, report) then
-                valid = valid + 1
-            end
+        if isSafe(report) then
+            valid = valid + 1
         end
     end
 
@@ -68,46 +80,8 @@ function Day02.part1(content)
 end
 
 function Day02.part2(content)
-    local valid = 0
     local reports = parse(content)
-
-    for _, report in ipairs(reports) do
-        local idx = 2
-        local canModify = true
-        -- if numbers are the same remove the first number
-        if report[idx] == report[idx - 1] then
-            table.remove(report, 1)
-            canModify = false
-        end
-        -- check if accending or decending order
-        if report[idx - 1] < report[idx] then
-            local result, position = check(ascending, report)
-            if result then
-                valid = valid + 1
-            else
-                if canModify then
-                    table.remove(report, position)
-                end
-                if check(ascending, report) then
-                    valid = valid + 1
-                end
-            end
-        elseif report[idx - 1] > report[idx] then
-            local result, position = check(decending, report)
-            if result then
-                valid = valid + 1
-            else
-                if canModify then
-                    table.remove(report, position)
-                end
-                if check(decending, report) then
-                    valid = valid + 1
-                end
-            end
-        end
-    end
-
-    return valid
+    return countSafe(reports)
 end
 
 return Day02
