@@ -14,34 +14,35 @@ function parse(content)
     return reports
 end
 
-function ascending(report)
-    for i = 2, #report do
-        local current = report[i]
-        local previous = report[i-1]
-        local diff = math.abs(previous - current)
+function outsideRange(current, previous)
+    local diff = math.abs(previous - current)
+    return diff < 1 or diff > 3
+end
 
-        if previous >= current then
-            return false
-        elseif diff < 1 or diff > 3 then
-            return false
-        end
+function ascending(current, previous)
+    if previous >= current then
+        return false
     end
     return true
 end
 
-function decending(report)
-    for i = 2, #report do
-        local current = report[i]
-        local previous = report[i-1]
-        local diff = math.abs(previous - current)
+function decending(current, previous)
+    if previous <= current then
+        return false
+    end
+    return true
+end
 
-        if previous <= current then
+function check(comparer, report)
+    for idx = 2, #report do
+        local current = report[idx]
+        local previous = report[idx - 1]
+        if not comparer(current, previous) then
             return false
-        elseif diff < 1 or diff > 3 then
+        elseif outsideRange(current, previous) then
             return false
         end
     end
-
     return true
 end
 
@@ -52,12 +53,12 @@ function Day02.part1(content)
     for _, report in ipairs(reports) do
         local idx = 2
         -- check if accending or decending order
-        if report[idx-1] < report[idx] then
-            if ascending(report) then
+        if report[idx - 1] < report[idx] then
+            if check(ascending, report) then
                 valid = valid + 1
             end
-        elseif report[idx-1] > report[idx] then
-            if decending(report) then
+        elseif report[idx - 1] > report[idx] then
+            if check(decending, report) then
                 valid = valid + 1
             end
         end
