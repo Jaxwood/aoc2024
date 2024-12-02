@@ -2,3 +2,17 @@
 
 My solutions for advent of code 2024 written in lua.
 
+
+## Setup
+
+```bash
+mise use lua
+make install
+```
+
+## Run Tests
+
+```bash
+make
+```
+
