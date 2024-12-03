@@ -68,15 +68,15 @@ function Day03.part2(content)
     end
 
     local sum = 0
+    local enabled = true
     for _, occurrences in ipairs(totalOccurrences) do
-        local enabled = true
         table.sort(occurrences, function(a, b) return a.start < b.start end)
         for _, occurrence in ipairs(occurrences) do
             if occurrence.op == "don't" then
                 enabled = false
             elseif occurrence.op == "do" then
                 enabled = true
-            elseif enabled then
+            elseif occurrence.op == "mul" and enabled then
                 sum = sum + (occurrence.a * occurrence.b)
             end
         end
