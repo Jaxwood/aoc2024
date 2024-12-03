@@ -41,34 +41,36 @@ function findPattern(line, pattern, plain)
 end
 
 function Day03.part2(content)
-    local occurrences = {}
-
-    -- Find all occurrences of the don't function
+    local totalOccurrences = {}
     for _, line in ipairs(content) do
+        local occurrences = {}
+        -- Find all occurrences of the don't function
         local matches = findPattern(line, "don't()", true)
         for _, match in ipairs(matches) do
-            table.insert(occurrences, { op = "don't", start = match.start, finish = match.finish, a = match.a, b = match.b })
+            table.insert(occurrences,
+                { op = "don't", start = match.start, finish = match.finish, a = match.a, b = match.b })
         end
-    end
 
-    -- Find all occurrences of the do function
-    for _, line in ipairs(content) do
-        local matches = findPattern(line, "do()", true)
+        -- Find all occurrences of the do function
+        matches = findPattern(line, "do()", true)
         for _, match in ipairs(matches) do
             table.insert(occurrences, { op = "do", start = match.start, finish = match.finish, a = match.a, b = match.b })
         end
-    end
 
-    -- Find all occurrences of the mul function
-    for _, line in ipairs(content) do
-        local matches = findPattern(line, "mul%((%d%d?%d?),(%d%d?%d?)%)", false)
+        -- Find all occurrences of the mul function
+        matches = findPattern(line, "mul%((%d%d?%d?),(%d%d?%d?)%)", false)
         for _, match in ipairs(matches) do
-            table.insert(occurrences, { op = "mul", start = match.start, finish = match.finish, a = match.a, b = match.b })
+            table.insert(occurrences,
+                { op = "mul", start = match.start, finish = match.finish, a = match.a, b = match.b })
         end
+
+        table.insert(totalOccurrences, occurrences)
     end
 
-    for _, occurrence in ipairs(occurrences) do
-        print(occurrence.op, occurrence.start, occurrence.finish, occurrence.a, occurrence.b)
+    for _, occurrences in ipairs(totalOccurrences) do
+        for _, occurrence in ipairs(occurrences) do
+            print(occurrence.op, occurrence.start, occurrence.finish, occurrence.a, occurrence.b)
+        end
     end
 
     return 0
