@@ -1,22 +1,25 @@
 local Day03 = {}
 
 function parse(content)
-    local left = {}
-    local right = {}
+    local instructions = {}
     for _, line in ipairs(content) do
-        l, r = line:match("(%d+)%s+(%d+)")
-        table.insert(left, tonumber(l))
-        table.insert(right, tonumber(r))
+        for m, n in line:gmatch("mul%((%d%d?%d?),(%d%d?%d?)%)") do
+            table.insert(instructions, {op = "mul", a = tonumber(m), b = tonumber(n)})
+        end
     end
 
-    table.sort(left)
-    table.sort(right)
-
-    return left, right
+    return instructions
 end
 
 function Day03.part1(content)
-    return 0
+    local instructions = parse(content)
+    local sum = 0
+    for _, instruction in ipairs(instructions) do
+        if instruction.op == "mul" then
+            sum = sum + (instruction.a * instruction.b)
+        end
+    end
+    return sum
 end
 
 return Day03
