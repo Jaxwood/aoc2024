@@ -27,6 +27,11 @@ function TestLibrary.test_part1()
     lu.assertEquals(Day03.part1(content), 161289189)
 end
 
+function TestLibrary.test_part2()
+    local content = readFile("data/day03.txt")
+    lu.assertEquals(Day03.part2(content), 85698778) -- too high
+end
+
 os.exit(lu.LuaUnit.run())
 
 

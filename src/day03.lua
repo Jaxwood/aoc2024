@@ -31,7 +31,7 @@ function findPattern(line, pattern, plain)
             break
         end
 
-        table.insert(occurrences, { start = foundStart, finish = foundEnd, a = a, b = b })
+        table.insert(occurrences, { start = foundStart, finish = foundEnd, a = tonumber(a), b = tonumber(b) })
 
         -- Move the search start to the character after the last found occurrence
         startIndex = foundEnd + 1
@@ -67,13 +67,22 @@ function Day03.part2(content)
         table.insert(totalOccurrences, occurrences)
     end
 
+    local sum = 0
     for _, occurrences in ipairs(totalOccurrences) do
+        local enabled = true
+        table.sort(occurrences, function(a, b) return a.start < b.start end)
         for _, occurrence in ipairs(occurrences) do
-            print(occurrence.op, occurrence.start, occurrence.finish, occurrence.a, occurrence.b)
+            if occurrence.op == "don't" then
+                enabled = false
+            elseif occurrence.op == "do" then
+                enabled = true
+            elseif enabled then
+                sum = sum + (occurrence.a * occurrence.b)
+            end
         end
     end
 
-    return 0
+    return sum
 end
 
 return Day03

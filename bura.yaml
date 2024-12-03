@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Bura
+metadata:
+  name: is-it-open
+  labels:
+    version: "1.0.0"
+spec:
+  chart:
+    metadata:
+      name: foo
+      labels:
+        version: "1.0.0"
+    spec:
+      valuesFiles:
+        - values.yaml
+  environments:
+    - metadata:
+        name: dev
+      spec:
+        imagePullSecrets:
+          - name: regcred-dev
+    - metadata:
+        name: prd
+      spec:
+        imagePullSecrets:
+          - name: regcred
+
