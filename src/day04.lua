@@ -13,6 +13,15 @@ function parse(content)
     return puzzle
 end
 
+--[[
+--  Returns the word found in the puzzle starting at the given x, y position
+--  and moving in all directions. If the word is not found, nil is returned.
+--  We capture the indexes of the characters in the word so that we can
+--  remove duplicates as the same word can be found in multiple times.
+--
+--  Data structure of the word:
+--  [{ x = number, y = number, char = string }]
+--]]
 function wordSearch(x, y, puzzle, searchTerm)
     return nil
 end
