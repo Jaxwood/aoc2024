@@ -22,5 +22,6 @@ build = {
        ["aoc2024.Day01"] = "src/day01.lua",
        ["aoc2024.Day02"] = "src/day02.lua",
        ["aoc2024.Day03"] = "src/day03.lua",
+       ["aoc2024.Day04"] = "src/day04.lua",
    }
 }
