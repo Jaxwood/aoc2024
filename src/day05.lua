@@ -47,21 +47,22 @@ function Day05.part1(content)
         local valid = true
         local last = 0
         for idx, val in ipairs(update) do
+            -- store first element in updates
             if idx == 1 then
                 last = val
             else
+                -- check if the current element is in the correct order to the rest
                 for i = idx, #update do
+                    -- if element is not found it should be last
                     if not manual.ordering[last] then
                         valid = i ~= #update
+                    -- if element is found it should be in the correct order
                     elseif not has_value(manual.ordering[last], update[i]) then
                         valid = false
                         break
                     end
                 end
                 last = val
-                if not valid then
-                    break
-                end
             end
         end
         if valid then
