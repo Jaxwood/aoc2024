@@ -53,13 +53,15 @@ function Day05.part1(content)
             else
                 -- check if the current element is in the correct order to the rest
                 for i = idx, #update do
+                    if not valid then
+                        break
+                    end
                     -- if element is not found it should be last
                     if not manual.ordering[last] then
                         valid = i ~= #update
                     -- if element is found it should be in the correct order
-                    elseif not has_value(manual.ordering[last], update[i]) then
-                        valid = false
-                        break
+                    else
+                        valid = has_value(manual.ordering[last], update[i])
                     end
                 end
                 last = val
