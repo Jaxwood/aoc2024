@@ -105,11 +105,13 @@ function Day05.part2(content)
                 last = val
             end
         end
+        -- store all unsorted values
         if not valid then
             table.insert(unsorted, update)
         end
     end
 
+    -- sort values
     for _, update in ipairs(unsorted) do
         table.sort(update, function(a, b)
             if not manual.ordering[a] then
@@ -122,6 +124,7 @@ function Day05.part2(content)
         end)
     end
 
+    -- get the middle value and sum it
     for _, update in ipairs(unsorted) do
         sum = sum + update[(#update // 2) + 1]
     end
