@@ -21,9 +21,11 @@ function parse(content)
 end
 
 function Day06.part1(content)
+    local uniques = {}
     local map, start = parse(content)
     print(start.x, start.y)
-    return 0
+
+    return #uniques
 end
 
 return Day06
