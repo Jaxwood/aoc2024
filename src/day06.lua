@@ -23,11 +23,8 @@ end
 function Day06.part1(content)
     local map, start = parse(content)
     local visited = {}
-    if not visited[start.y] then
-        visited[start.y] = {}
-    end
+    visited[start.y] = {}
     visited[start.y][start.x] = true
-
     local queue = { start }
 
     while #queue > 0 do
@@ -80,7 +77,6 @@ function Day06.part1(content)
         table.insert(queue, next)
     end
 
-
     -- count the number of visited locations
     local total = 0
     for _, v in pairs(visited) do
@@ -88,6 +84,7 @@ function Day06.part1(content)
             total = total + 1
         end
     end
+
     return total
 end
 
