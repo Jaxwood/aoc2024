@@ -17,6 +17,11 @@ function TestLibrary.test_parta()
     lu.assertEquals(Day06.part1(content), 41)
 end
 
+function TestLibrary.test_part1()
+    local content = readFile("data/day06.txt")
+    lu.assertEquals(Day06.part1(content), 5534)
+end
+
 os.exit(lu.LuaUnit.run())
 
 
