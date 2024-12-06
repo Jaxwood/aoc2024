@@ -20,22 +20,14 @@ function parse(content)
     return map, start
 end
 
-function has_value(tab, val)
-    for _, value in ipairs(tab) do
-        if value == val then
-            return true
-        end
-    end
-    return false
-end
-
-function hashKey(x, y)
-    return x * 1000 + y
-end
-
 function Day06.part1(content)
     local map, start = parse(content)
-    local visited = { hashKey(start.x, start.y) }
+    local visited = {}
+    if not visited[start.y] then
+        visited[start.y] = {}
+    end
+    visited[start.y][start.x] = true
+
     local queue = { start }
 
     while #queue > 0 do
@@ -81,15 +73,22 @@ function Day06.part1(content)
         -- update position
         map[y][x] = '.'
         map[next.y][next.x] = location
-        local key = hashKey(next.x, next.y)
-        if not has_value(visited, key) then
-            table.insert(visited, key)
+        if not visited[next.y] then
+            visited[next.y] = {}
         end
+        visited[next.y][next.x] = true
         table.insert(queue, next)
     end
 
 
-    return #visited
+    -- count the number of visited locations
+    local total = 0
+    for _, v in pairs(visited) do
+        for _, _ in pairs(v) do
+            total = total + 1
+        end
+    end
+    return total
 end
 
 return Day06
