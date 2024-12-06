@@ -24,7 +24,7 @@ function Day06.part1(content)
     local map, start = parse(content)
     local visited = {}
     visited[start.y] = {}
-    visited[start.y][start.x] = true
+    visited[start.y][start.x] = '^'
     local queue = { start }
 
     while #queue > 0 do
@@ -73,7 +73,7 @@ function Day06.part1(content)
         if not visited[next.y] then
             visited[next.y] = {}
         end
-        visited[next.y][next.x] = true
+        visited[next.y][next.x] = location
         table.insert(queue, next)
     end
 
@@ -86,6 +86,20 @@ function Day06.part1(content)
     end
 
     return total
+end
+
+--[[
+-- First we find the route to the end of the maze.
+-- This will give us all the unique locations we have visited.
+-- We then insert an obstacle at each location and check if create a cycle (except for the start location).
+--
+-- To detect a cycle we need to check if the current position has been visited before
+-- and if we are traveling in the same direction.
+--
+-- The final answer is the number of cycles we have found.
+--]]
+function part2(content)
+    return 0
 end
 
 return Day06
