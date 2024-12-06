@@ -29,7 +29,7 @@ end
 
 function TestLibrary.test_part2()
     local content = readFile("data/day06.txt")
-    lu.assertEquals(Day06.part2(content), 2135)
+    lu.assertEquals(Day06.part2(content), 2262)
 end
 
 os.exit(lu.LuaUnit.run())

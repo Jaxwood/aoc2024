@@ -20,11 +20,9 @@ function parse(content)
     return map, start
 end
 
-function is_cycle(map, start, direction)
-    local visited = {}
-    visited[start.y] = {}
-    visited[start.y][start.x] = direction
+function is_cycle(map, start, direction, max)
     local queue = { { x = start.x, y = start.y } }
+    local size = 1
 
     while #queue > 0 do
         local current = table.remove(queue, 1)
@@ -50,33 +48,31 @@ function is_cycle(map, start, direction)
 
         -- check if we hit a wall and turn 90 degrees right
         if map[next.y][next.x] == '#' then
-            next = { x = x, y = y }
             if location == 'v' then
-                next.x = x - 1
                 location = '<'
             elseif location == '^' then
-                next.x = x + 1
                 location = '>'
             elseif location == '<' then
-                next.y = y - 1
                 location = '^'
             elseif location == '>' then
-                next.y = y + 1
                 location = 'v'
             end
-        end
+            map[y][x] = location
 
-        -- update position
-        map[y][x] = '.'
-        map[next.y][next.x] = location
-        if not visited[next.y] then
-            visited[next.y] = {}
+            -- update position
+            table.insert(queue, current)
+        else
+            map[y][x] = '.'
+            map[next.y][next.x] = location
+
+            -- update position
+            table.insert(queue, next)
+            size = size + 1
+
+            if size > max then
+                return true
+            end
         end
-        if visited[next.y][next.x] == location then
-            return true
-        end
-        visited[next.y][next.x] = location
-        table.insert(queue, next)
     end
 end
 
@@ -110,30 +106,31 @@ function traverse(map, start, direction)
 
         -- check if we hit a wall and turn 90 degrees right
         if map[next.y][next.x] == '#' then
-            next = { x = x, y = y }
             if location == 'v' then
-                next.x = x - 1
                 location = '<'
             elseif location == '^' then
-                next.x = x + 1
                 location = '>'
             elseif location == '<' then
-                next.y = y - 1
                 location = '^'
             elseif location == '>' then
-                next.y = y + 1
                 location = 'v'
             end
+            map[y][x] = location
+            -- update position
+            visited[y][x] = location
+            table.insert(queue, current)
+        else
+            map[y][x] = '.'
+            map[next.y][next.x] = location
+
+            -- update position
+            if not visited[next.y] then
+                visited[next.y] = {}
+            end
+            visited[next.y][next.x] = location
+            table.insert(queue, next)
         end
 
-        -- update position
-        map[y][x] = '.'
-        map[next.y][next.x] = location
-        if not visited[next.y] then
-            visited[next.y] = {}
-        end
-        visited[next.y][next.x] = location
-        table.insert(queue, next)
     end
 
     return visited
@@ -170,8 +167,7 @@ end
 -- This will give us all the unique locations we have visited.
 -- We then insert an obstacle at each location and check if create a cycle (except for the start location).
 --
--- To detect a cycle we need to check if the current position has been visited before
--- and if we are traveling in the same direction.
+-- To detect a cycle we need to check if the length of the path is greater than the number of locations in the maze.
 --
 -- The final answer is the number of cycles we have found.
 --]]
@@ -186,7 +182,7 @@ function Day06.part2(content)
             if start.x ~= x or start.y ~= y then
                 local copy = copy_table(map)
                 copy[y][x] = '#'
-                if is_cycle(copy, start, '^') then
+                if is_cycle(copy, start, '^', #map * #map[1]) then
                     total = total + 1
                 end
             end
