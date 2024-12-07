@@ -39,12 +39,10 @@ function Day07.part1(content)
     local total = 0
 
     for _, eq in ipairs(data) do
-        local result = eq.result
-        local numbers = eq.numbers
-        local start = table.remove(numbers, 1)
+        local start = table.remove(eq.numbers, 1)
 
-        if solve(copy_table(numbers), start, result) then
-            total = total + result
+        if solve(copy_table(eq.numbers), start, eq.result) then
+            total = total + eq.result
         end
     end
 
