@@ -21,6 +21,21 @@ function copy_table(original)
     return copy
 end
 
+function solve_combine(numbers, total, result)
+    if total == result then
+        return true
+    end
+
+    if #numbers == 0 then
+        return false
+    end
+
+    local next = table.remove(numbers, 1)
+    return solve_combine(copy_table(numbers), total + next, result) or
+        solve_combine(copy_table(numbers), total * next, result) or
+        solve_combine(copy_table(numbers), tonumber(tostring(total) .. tostring(next)), result)
+end
+
 function solve(numbers, total, result)
     if total == result then
         return true
@@ -42,6 +57,21 @@ function Day07.part1(content)
         local start = table.remove(eq.numbers, 1)
 
         if solve(copy_table(eq.numbers), start, eq.result) then
+            total = total + eq.result
+        end
+    end
+
+    return total
+end
+
+function Day07.part2(content)
+    local data = parse(content)
+    local total = 0
+
+    for _, eq in ipairs(data) do
+        local start = table.remove(eq.numbers, 1)
+
+        if solve_combine(copy_table(eq.numbers), start, eq.result) then
             total = total + eq.result
         end
     end
