@@ -22,7 +22,7 @@ function copy_table(original)
 end
 
 function solve_combine(numbers, total, result)
-    if total == result then
+    if total == result and #numbers == 0 then
         return true
     end
 

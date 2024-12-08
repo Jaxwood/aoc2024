@@ -28,7 +28,6 @@ function TestLibrary.test_part1()
 end
 
 function TestLibrary.test_part2()
-    lu.skip("slow")
     local content = readFile("data/day07.txt")
     lu.assertEquals(Day07.part2(content), 162042343638683)
 end
