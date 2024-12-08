@@ -17,9 +17,23 @@ function TestLibrary.test_part8a()
     lu.assertEquals(Day08.part1(content), 14)
 end
 
-function TestLibrary.test_part81()
+function TestLibrary.test_part8b()
+    local content = readFile("data/day08b.txt")
+    lu.assertEquals(Day08.part2(content), 9)
+end
+
+function TestLibrary.test_part8bb()
+    local content = readFile("data/day08a.txt")
+    lu.assertEquals(Day08.part2(content), 34)
+end
+
+function TestLibrary.test_part8_1()
     local content = readFile("data/day08.txt")
     lu.assertEquals(Day08.part1(content), 259)
+end
+function TestLibrary.test_part8_2()
+    local content = readFile("data/day08.txt")
+    lu.assertEquals(Day08.part2(content), 927)
 end
 
 os.exit(lu.LuaUnit.run())
