@@ -42,20 +42,61 @@ local function permute(coords)
     return perms
 end
 
+local function withinMap(coord, map)
+    return coord.x > 0 and coord.x <= #map[1] and coord.y > 0 and coord.y <= #map
+end
+
+local table_contains = function(t, e)
+    for _, v in ipairs(t) do
+        if v.x == e.x and v.y == e.y then
+            return true
+        end
+    end
+    return false
+end
+
 function Day08.part1(content)
     local map, coords = parse(content)
-    local height = #map
-    local width = #map[1]
+    local antinodes = {}
 
-    for k, v in pairs(coords) do
+    for _, v in pairs(coords) do
         -- find all permutations of the coordinates in pairs of two
         local perms = permute(v)
         for _, c in ipairs(perms) do
-            print(k, c[1].x .. "," .. c[1].y, c[2].x .. "," .. c[2].y)
+            -- calculate the antinodes
+            local first = c[1]
+            local second = c[2]
+            local xDiff = math.abs(c[2].x - c[1].x)
+            local yDiff = math.abs(c[2].y - c[1].y)
+            local antinodeOne = { x = 0, y = 0 }
+            local antinodeTwo = { x = 0, y = 0 }
+            if first.x > second.x then
+                antinodeOne.x = first.x + xDiff
+                antinodeTwo.x = second.x - xDiff
+            else
+                antinodeOne.x = first.x - xDiff
+                antinodeTwo.x = second.x + xDiff
+            end
+            if first.y > second.y then
+                antinodeOne.y = first.y + yDiff
+                antinodeTwo.y = second.y - yDiff
+            else
+                antinodeOne.y = first.y - yDiff
+                antinodeTwo.y = second.y + yDiff
+            end
+
+            -- check if the antinodes are within the map and not already in the list
+            if withinMap(antinodeOne, map) and not table_contains(antinodes, antinodeOne) then
+                table.insert(antinodes, antinodeOne)
+            end
+
+            if withinMap(antinodeTwo, map) and not table_contains(antinodes, antinodeTwo) then
+                table.insert(antinodes, antinodeTwo)
+            end
         end
     end
 
-    return 0
+    return #antinodes
 end
 
 return Day08
