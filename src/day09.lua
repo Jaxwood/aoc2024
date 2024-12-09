@@ -44,6 +44,7 @@ function Day09.part1(content)
         end
     end
 
+    -- calculate total
     local idx = 0
     local total = 0
     for i = 1, #disk do
