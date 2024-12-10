@@ -28,7 +28,6 @@ function Day10.part1(content)
         local visited = { [trailhead.y] = { [trailhead.x] = true } }
         local queue = { { x = trailhead.x, y = trailhead.y, current = 0 } }
         while #queue > 0 do
-            -- check neighbors
             local next = table.remove(queue, 1)
 
             -- check if we reached the end
