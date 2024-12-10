@@ -71,12 +71,13 @@ function Day09.part2(content)
     local disk, _ = parse(content)
 
     -- move blocks to free space
-    -- from the end to the beginning
+    -- start with highest id
     for i = #disk, 1, -1 do
         local block = disk[i]
 
         -- move whole block to free space
-        for j = 1, #disk do
+        -- to the leftmost block with enough space
+        for j = 1, i  do
             if disk[j].free >= block.block then
                 for _ = 1, block.block do
                     table.insert(disk[j].storage, block.id)
@@ -92,9 +93,8 @@ function Day09.part2(content)
     local idx = 0
     local total = 0
     for i = 1, #disk do
-        for j = 1, disk[i].block do
-            if disk[i].moved then
-            else
+        for _ = 1, disk[i].block do
+            if not disk[i].moved then
                 total = total + (disk[i].id * idx)
             end
             idx = idx + 1
@@ -103,8 +103,7 @@ function Day09.part2(content)
             total = total + (disk[i].storage[j] * idx)
             idx = idx + 1
         end
-        for j = 1, disk[i].free do
-            total = (total + 0 * idx)
+        for _ = 1, disk[i].free do
             idx = idx + 1
         end
     end

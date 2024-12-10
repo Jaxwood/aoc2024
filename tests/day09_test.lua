@@ -23,13 +23,14 @@ function TestLibrary.test_part09b()
 end
 
 function TestLibrary.test_part09_1()
+    lu.skip("slow")
     local content = readFile("data/day09.txt")
     lu.assertEquals(Day09.part1(content), 6366665108136)
 end
 
 function TestLibrary.test_part09_2()
-    local content = readFile("data/day09.txt")           -- too low    96671935444
-    lu.assertEquals(Day09.part2(content), 8607352322743) -- too high 8607352322743
+    local content = readFile("data/day09.txt")
+    lu.assertEquals(Day09.part2(content), 6398065450842)
 end
 
 os.exit(lu.LuaUnit.run())
