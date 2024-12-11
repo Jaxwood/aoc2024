@@ -14,12 +14,17 @@ end
 
 function TestLibrary.test_part11a()
     local content = readFile("data/day11a.txt")
-    lu.assertEquals(Day11.part1(content), 55312)
+    lu.assertEquals(Day11.part1(content, 25), 55312)
 end
 
 function TestLibrary.test_part11_1()
     local content = readFile("data/day11.txt")
-    lu.assertEquals(Day11.part1(content), 183484)
+    lu.assertEquals(Day11.part1(content, 25), 183484)
+end
+
+function TestLibrary.test_part11_2()
+    local content = readFile("data/day11.txt")
+    lu.assertEquals(Day11.part1(content, 75), 218817038947400)
 end
 
 os.exit(lu.LuaUnit.run())

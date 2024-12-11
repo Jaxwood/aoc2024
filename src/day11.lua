@@ -5,38 +5,58 @@ local function parse(content)
 
     for y = 1, #content do
         for num in content[y]:gmatch("(%d+)") do
-            table.insert(nums, tonumber(num))
+            local n = tonumber(num)
+            nums[n] = 1
         end
     end
 
     return nums
 end
 
-function Day11.part1(content)
+local function split_number(number)
+    local digit_count = math.floor(math.log10(number)) + 1
+
+    -- Calculate the split point
+    local half_digits = digit_count // 2
+
+    -- Split the number
+    local first_part = math.floor(number / (10 ^ half_digits))
+    local second_part = number % (10 ^ half_digits)
+
+    return { first_part, math.floor(second_part) }
+end
+
+function Day11.part1(content, iterations)
     local nums = parse(content)
-    local iterations = 25
 
-    for _ = 1, iterations do
-        local newnums = {}
-
-        for _, num in ipairs(nums) do
+    for i = 1, iterations do
+        local next = {}
+        for num, val in pairs(nums) do
+            -- If the number is 0, the stone becomes 1
             if num == 0 then
-                table.insert(newnums, 1)
-            elseif #tostring(num) % 2 == 0 then
-                local newnum = tostring(num)
-                local half = #newnum / 2
-                table.insert(newnums, tonumber(newnum:sub(1, half)))
-                table.insert(newnums, tonumber(newnum:sub(half + 1, #newnum)))
+                next[1] = (next[1] or 0) + val
+            -- If the number is even, the stone splits into two stones
+            elseif (#tostring(num)) % 2 == 0 then
+                local ns = split_number(num)
+                for _, n in ipairs(ns) do
+                    next[n] = (next[n] or 0) + val
+                end
+            -- otherwise, the stone is multiplied by 2024
             else
-                table.insert(newnums, num * 2024)
+                local n = num * 2024
+                next[n] = val
             end
         end
-
-        nums = newnums
+        nums = next
     end
 
-    return #nums
+    -- Calculate the sum of the stones
+    local sum = 0
+    for _, val in pairs(nums) do
+        sum = sum + val
+    end
+
+    return sum
 end
 
 return Day11
-
