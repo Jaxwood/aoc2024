@@ -26,6 +26,39 @@ local function parse(content)
     return rules
 end
 
+
+-- this is an example of vector calculation
+-- using the first example, the formular can be written as:
+-- a[94, 34] + b[22, 67] = [94a+22b, 34a + 67b]
+--
+-- if the prize is [8400, 5400], then the formular can be written as:
+-- [94a+22b, 34a + 67b] = [8400, 5400]
+-- 94a + 22b = 8400
+-- 34a + 67b = 5400
+--
+-- for a this can be written as:
+-- 94a = 8400 - 22b
+-- a = (8400 - 22b) / 94
+--
+-- for b this can be written as:
+-- 67b = 5400 - 34a
+-- b = (5400 - 34a) / 67
+--
+-- subtitute a into b:
+-- b = (5400 - 34(8400 - 22b) / 94) / 67
+--
+-- 34((8400 - 22b) / 94) + 67b = 5400
+-- 34(8400 - 22b) + 67b * 94 = 5400 * 94
+-- 285600 - 748b + 6298b = 507600
+-- 285600 + 5550b = 507600
+-- 5550b = 222000
+-- b = 222000 / 5550
+-- b = 40
+-- a = (8400 - 22b) / 94
+-- a = (8400 - 22*40) / 94
+-- a = 80
+--
+-- if a and b is not an even number, then the prize is not reachable
 function Day13.part1(content)
     local rules = parse(content)
     local sum = 0
