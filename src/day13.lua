@@ -58,7 +58,7 @@ end
 -- a = (8400 - 22*40) / 94
 -- a = 80
 --
--- if a and b is not an even number, then the prize is not reachable
+-- if a and b is not an integer, then the prize is not reachable
 function Day13.part1(content)
     local rules = parse(content)
     local sum = 0
