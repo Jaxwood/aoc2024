@@ -26,60 +26,33 @@ local function parse(content)
     return rules
 end
 
-
--- this is an example of vector calculation
--- using the first example, the formular can be written as:
--- a[94, 34] + b[22, 67] = [94a+22b, 34a + 67b]
---
--- if the prize is [8400, 5400], then the formular can be written as:
--- [94a+22b, 34a + 67b] = [8400, 5400]
--- 94a + 22b = 8400
--- 34a + 67b = 5400
---
--- for a this can be written as:
--- 94a = 8400 - 22b
--- a = (8400 - 22b) / 94
---
--- for b this can be written as:
--- 67b = 5400 - 34a
--- b = (5400 - 34a) / 67
---
--- subtitute a into b:
--- b = (5400 - 34(8400 - 22b) / 94) / 67
---
--- 34((8400 - 22b) / 94) + 67b = 5400
--- 34(8400 - 22b) + 67b * 94 = 5400 * 94
--- 285600 - 748b + 6298b = 507600
--- 285600 + 5550b = 507600
--- 5550b = 222000
--- b = 222000 / 5550
--- b = 40
--- a = (8400 - 22b) / 94
--- a = (8400 - 22*40) / 94
--- a = 80
---
--- if a and b is not an integer, then the prize is not reachable
-function Day13.part1(content)
+function Day13.part1(content, offset)
     local rules = parse(content)
     local sum = 0
 
     for _, rule in ipairs(rules) do
+        rule.prize.x = rule.prize.x + offset
+        rule.prize.y = rule.prize.y + offset
+
         local a = rule.rule[1]
         local b = rule.rule[2]
-        local prize = rule.prize
-        -- press button a upto 100 times
-        for aa = 1, 100 do
-            -- press button b upto 100 times
-            for bb = 1, 100 do
-                local coord_x, coord_y = (a.x * aa) + (b.x * bb), (a.y * aa) + (b.y * bb)
-                if coord_x == prize.x and coord_y == prize.y then
-                    sum = sum + (aa * 3) + bb
-                end
-            end
+
+        -- using cramer's rule
+        local determinant = a.x * b.y - a.y * b.x
+        local detX = rule.prize.x * b.y - rule.prize.y * b.x
+        local detY = a.x * rule.prize.y - a.y * rule.prize.x
+
+        local resultA = math.floor(detX / determinant)
+        local resultB = math.floor(detY / determinant)
+
+        if (resultA * a.x + resultB * b.x) == rule.prize.x and (resultA * a.y + resultB * b.y)  == rule.prize.y then
+            sum = sum + ((resultA * 3) + resultB)
         end
+
     end
 
     return sum
 end
 
 return Day13
+
