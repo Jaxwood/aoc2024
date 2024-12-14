@@ -29,7 +29,7 @@ function TestLibrary.test_part14_2()
     -- so i just looped through the iterations by increments of 101 and printed the output to a file
     -- from scanning the output i found the correct iteration which for my input was 7051
     lu.skip("Skip part 2")
-    for i = 82, 1000, 101 do
+    for i = 82, 10000, 101 do
         Day14.part1(content, 101, 103, i)
     end
 end
