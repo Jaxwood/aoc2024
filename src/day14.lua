@@ -28,15 +28,30 @@ local function count_robots(robots, x1, y1, x2, y2)
     return sum
 end
 
+local function print_to_file(robots, width, height, iteration)
+    local file = io.open("output.txt", "a")
+    file:write("iteration " .. iteration .. "\n")
+    for y = 1, height do
+        for x = 1, width do
+            local found = false
+            for _, robot in ipairs(robots) do
+                if robot.x == x and robot.y == y then
+                    file:write("#")
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                file:write(".")
+            end
+        end
+        file:write("\n")
+    end
+    file:close()
+end
+
 function Day14.part1(content, width, height, iterations)
     local robots = parse(content)
-    local map = {}
-    for i = 1, height do
-        map[i] = {}
-        for j = 1, width do
-            map[i][j] = '.'
-        end
-    end
 
     for _ = 1, iterations do
         -- move robot according to velocity
@@ -58,6 +73,9 @@ function Day14.part1(content, width, height, iterations)
             end
         end
     end
+
+    -- for part 2, print the grid to a file
+    -- print_to_file(robots, width, height, iterations)
 
     -- find the middle of the grid
     local horizontal = (width // 2 + 1)
