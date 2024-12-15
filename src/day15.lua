@@ -79,32 +79,6 @@ local find_robot = function(map)
     end
 end
 
--- helper function to print the map
-local print_map = function(map, robot)
-    print()
-    for y, row in ipairs(map) do
-        local line = ""
-        for x, cell in ipairs(row) do
-            if x == robot.x and y == robot.y then
-                line = line .. "@"
-            elseif cell == WALL then
-                line = line .. "#"
-            elseif cell == OPEN then
-                line = line .. "."
-            elseif cell == BOX then
-                line = line .. "O"
-            elseif cell == LEFTBOX then
-                line = line .. "["
-            elseif cell == RIGHTBOX then
-                line = line .. "]"
-            elseif cell == ROBOT then
-                line = line .. "@"
-            end
-        end
-        print(line)
-    end
-end
-
 -- move robot to the next position
 local function move_to(from, direction)
     if direction == LEFT then
@@ -184,6 +158,134 @@ local function calculate_score(map)
     return score
 end
 
+local function get_matching_side(map, box, direction)
+    local tile = map[box.y][box.x]
+
+    if tile == LEFTBOX then
+        return { x = box.x + 1, y = box.y }
+    else
+        return { x = box.x - 1, y = box.y }
+    end
+end
+
+local function can_move_wide(map, robot, direction)
+    -- we can't move walls
+    if map[robot.y][robot.x] == WALL then
+        return false
+    end
+
+    -- we can move to an open space
+    if map[robot.y][robot.x] == OPEN then
+        return true
+    end
+
+    -- found box
+    -- find match side for the box
+    local side = get_matching_side(map, robot, direction)
+
+    if direction == LEFT or direction == RIGHT then
+        return can_move_wide(map, move_to(robot, direction), direction)
+    else
+        return can_move_wide(map, move_to(robot, direction), direction) and
+            can_move_wide(map, move_to(side, direction), direction)
+    end
+end
+
+local function contains(list, item)
+    for _, i in ipairs(list) do
+        if i.x == item.x and i.y == item.y then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function push(map, side1, side2, direction)
+    local queue = { side1, side2 }
+    local boxes_to_move = {}
+
+    -- find all the boxes that needs moving
+    while #queue > 0 do
+        local box = table.remove(queue, 1)
+
+        if not contains(boxes_to_move, box) then
+            table.insert(boxes_to_move, box)
+        end
+
+        local next = move_to(box, direction)
+
+        if map[next.y][next.x] == RIGHTBOX or map[next.y][next.x] == LEFTBOX then
+            local side = get_matching_side(map, next, direction)
+            table.insert(queue, next)
+            table.insert(queue, side)
+        end
+    end
+
+    -- sort the boxes to avoid overriding the boxes
+    table.sort(boxes_to_move, function(a, b)
+        if direction == UP then
+            return a.y < b.y
+        else
+            return a.y > b.y
+        end
+    end)
+
+    -- now we can move the boxes
+    for _, box in ipairs(boxes_to_move) do
+        local next = move_to(box, direction)
+        map[next.y][next.x] = map[box.y][box.x]
+        map[box.y][box.x] = OPEN
+    end
+end
+
+local function push_boxes_wide(map, box, direction)
+    -- we should never hit this case
+    if map[box.y][box.x] ~= LEFTBOX and map[box.y][box.x] ~= RIGHTBOX then
+        return error("Not a box")
+    end
+
+    -- next box to move
+    local next = move_to(box, direction)
+
+    -- handle case for pushing boxes up or down
+    if direction == UP or direction == DOWN then
+        local side = get_matching_side(map, box, direction)
+        push(map, box, side, direction)
+    else -- moving left or right
+        while map[next.y][next.x] == LEFTBOX or map[next.y][next.x] == RIGHTBOX do
+            -- update map
+            if map[next.y][next.x] == LEFTBOX then
+                map[next.y][next.x] = RIGHTBOX
+            else
+                map[next.y][next.x] = LEFTBOX
+            end
+            next = move_to(next, direction)
+        end
+
+        -- update map
+        map[box.y][box.x] = OPEN
+
+        map[next.y][next.x] = direction == RIGHT and RIGHTBOX or LEFTBOX
+    end
+end
+
+local function move_wide(map, robot, direction)
+    local next = move_to(robot, direction)
+    -- move box
+    if can_move_wide(map, next, direction) then
+        -- move robot as the space is open
+        if map[next.y][next.x] == OPEN then
+            return map, next
+        else -- we hit a box and we can move it
+            push_boxes_wide(map, next, direction)
+            return map, next
+        end
+    else -- can't move; stay in the same place
+        return map, robot
+    end
+end
+
 function Day15.part1(content)
     local map, movements = parse(content, false)
     local robot = find_robot(map)
@@ -196,13 +298,18 @@ function Day15.part1(content)
     return calculate_score(map)
 end
 
+
 function Day15.part2(content)
-    local map, _ = parse(content, true)
+    local map, movements = parse(content, true)
     local robot = find_robot(map)
 
-    print_map(map, robot)
+    -- move the robot according to the rules of the game
+    for m = 1, #movements do
+        map, robot = move_wide(map, robot, movements[m])
+    end
 
     return calculate_score(map)
 end
 
 return Day15
+
