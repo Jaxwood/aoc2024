@@ -1,19 +1,47 @@
 local Day15 = {}
 
+-- tiles
 local WALL = 0
 local OPEN = 1
 local BOX = 2
+local LEFTBOX = 3
+local RIGHTBOX = 4
+local ROBOT = 5
 
+-- movements
 local LEFT = 0
 local RIGHT = 1
 local UP = 2
 local DOWN = 3
 
-local function parse(content)
+local function parse_movement(c)
+    if c == "<" then
+        return LEFT
+    elseif c == ">" then
+        return RIGHT
+    elseif c == "^" then
+        return UP
+    elseif c == "v" then
+        return DOWN
+    end
+end
+
+local function parse_tile(c, wide)
+    if c == "#" then
+        return wide and { WALL, WALL } or { WALL }
+    elseif c == "." then
+        return wide and { OPEN, OPEN } or { OPEN }
+    elseif c == "O" then
+        return wide and { LEFTBOX, RIGHTBOX } or { BOX }
+    else
+        return wide and { ROBOT, OPEN } or { ROBOT }
+    end
+end
+
+local function parse(content, wide)
     local is_movement = false
     local map = {}
     local movements = {}
-    local robot = nil
 
     for y, line in ipairs(content) do
         if line == "" then
@@ -21,54 +49,43 @@ local function parse(content)
         elseif is_movement then
             for x = 1, #line do
                 local c = line:sub(x, x)
-                if c == "<" then
-                    table.insert(movements, LEFT)
-                elseif c == ">" then
-                    table.insert(movements, RIGHT)
-                elseif c == "^" then
-                    table.insert(movements, UP)
-                elseif c == "v" then
-                    table.insert(movements, DOWN)
-                end
+                table.insert(movements, parse_movement(c))
             end
         else
             for x = 1, #line do
                 local c = line:sub(x, x)
-                if c == "#" then
+                local tile = parse_tile(c, wide)
+                for _, t in ipairs(tile) do
                     if not map[y] then
                         map[y] = {}
                     end
-                    map[y][x] = WALL
-                elseif c == "." then
-                    if not map[y] then
-                        map[y] = {}
-                    end
-                    map[y][x] = OPEN
-                elseif c == "O" then
-                    if not map[y] then
-                        map[y] = {}
-                    end
-                    map[y][x] = BOX
-                else
-                    if not map[y] then
-                        map[y] = {}
-                    end
-                    map[y][x] = OPEN
-                    robot = { x = x, y = y }
+                    table.insert(map[y], t)
                 end
             end
         end
     end
 
-    return map, movements, robot
+    return map, movements
+end
+
+local find_robot = function(map)
+    for y, row in ipairs(map) do
+        for x, cell in ipairs(row) do
+            if cell == ROBOT then
+                map[y][x] = OPEN
+                return { x = x, y = y }
+            end
+        end
+    end
 end
 
 -- helper function to print the map
 local print_map = function(map, robot)
+    print()
     for y, row in ipairs(map) do
         local line = ""
         for x, cell in ipairs(row) do
-            if robot.x == x and robot.y == y then
+            if x == robot.x and y == robot.y then
                 line = line .. "@"
             elseif cell == WALL then
                 line = line .. "#"
@@ -76,6 +93,12 @@ local print_map = function(map, robot)
                 line = line .. "."
             elseif cell == BOX then
                 line = line .. "O"
+            elseif cell == LEFTBOX then
+                line = line .. "["
+            elseif cell == RIGHTBOX then
+                line = line .. "]"
+            elseif cell == ROBOT then
+                line = line .. "@"
             end
         end
         print(line)
@@ -145,7 +168,6 @@ local function move(map, robot, direction)
     else -- can't move; stay in the same place
         return map, robot
     end
-
 end
 
 local function calculate_score(map)
@@ -154,7 +176,7 @@ local function calculate_score(map)
         for x, cell in ipairs(row) do
             if cell == BOX then
                 -- subtract 1 from x and y as the index starts from 1 in lua
-                score = score + (((y-1) * 100) + (x-1))
+                score = score + (((y - 1) * 100) + (x - 1))
             end
         end
     end
@@ -163,11 +185,8 @@ local function calculate_score(map)
 end
 
 function Day15.part1(content)
-    local map, movements, robot = parse(content)
-
-    if not robot then
-        return error("Robot not found")
-    end
+    local map, movements = parse(content, false)
+    local robot = find_robot(map)
 
     -- move the robot according to the rules of the game
     for m = 1, #movements do
@@ -175,6 +194,15 @@ function Day15.part1(content)
     end
 
     return calculate_score(map)
+end
+
+function Day15.part2(content)
+    local map, _ = parse(content, true)
+    local robot = find_robot(map)
+
+    print_map(map, robot)
+
+    return 0
 end
 
 return Day15
