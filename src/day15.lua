@@ -174,7 +174,7 @@ local function calculate_score(map)
     local score = 0
     for y, row in ipairs(map) do
         for x, cell in ipairs(row) do
-            if cell == BOX then
+            if cell == BOX or cell == LEFTBOX then
                 -- subtract 1 from x and y as the index starts from 1 in lua
                 score = score + (((y - 1) * 100) + (x - 1))
             end
@@ -202,7 +202,7 @@ function Day15.part2(content)
 
     print_map(map, robot)
 
-    return 0
+    return calculate_score(map)
 end
 
 return Day15
