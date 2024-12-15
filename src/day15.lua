@@ -153,6 +153,7 @@ local function calculate_score(map)
     for y, row in ipairs(map) do
         for x, cell in ipairs(row) do
             if cell == BOX then
+                -- subtract 1 from x and y as the index starts from 1 in lua
                 score = score + (((y-1) * 100) + (x-1))
             end
         end
@@ -168,9 +169,9 @@ function Day15.part1(content)
         return error("Robot not found")
     end
 
+    -- move the robot according to the rules of the game
     for m = 1, #movements do
-        local movement = movements[m]
-        map, robot = move(map, robot, movement)
+        map, robot = move(map, robot, movements[m])
     end
 
     return calculate_score(map)
