@@ -102,28 +102,26 @@ function Day16.part1(content)
 
     local queue = {}
     local visited = {}
+    local min = math.huge
     table.insert(queue, { x = from.x, y = from.y, cost = 0, facing = EAST })
+    table.insert(visited, { x = from.x, y = from.y, facing = EAST })
 
     while #queue > 0 do
         table.sort(queue, function(a, b) return a.cost < b.cost end)
         local current = table.remove(queue, 1)
+        if current.x == to.x and current.y == to.y then
+            min = math.min(min, current.cost)
+        end
 
-        -- mark as visited
-        table.insert(visited, { x = current.x, y = current.y, facing = current.facing })
-
-        local neighbors = get_neighbors(map, current)
-        for _, neighbor in ipairs(neighbors) do
+        for _, neighbor in ipairs(get_neighbors(map, current)) do
             if not contains(visited, neighbor) then
-                if neighbor.x == to.x and neighbor.y == to.y then
-                    return neighbor.cost
-                else
-                    table.insert(queue, neighbor)
-                end
+                table.insert(queue, neighbor)
+                table.insert(visited, { x = neighbor.x, y = neighbor.y, facing = neighbor.facing })
             end
         end
     end
 
-    return 0
+    return min
 end
 
 return Day16

@@ -23,9 +23,8 @@ function TestLibrary.test_part16b()
 end
 
 function TestLibrary.test_part16_1()
-    lu.skip("Skip test")
     local content = readFile("data/day16.txt")
-    lu.assertEquals(Day16.part1(content), 11048)
+    lu.assertEquals(Day16.part1(content), 85420)
 end
 
 os.exit(lu.LuaUnit.run())
