@@ -22,5 +22,11 @@ function TestLibrary.test_part17_1()
     lu.assertEquals(Day17.part1(content), "2,3,6,2,1,6,1,2,1")
 end
 
+function TestLibrary.test_part17_2()
+    lu.skip("slow")
+    local content = readFile("data/day17.txt")
+    lu.assertEquals(Day17.part2(content), 90938893795561)
+end
+
 os.exit(lu.LuaUnit.run())
 

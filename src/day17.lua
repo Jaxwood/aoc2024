@@ -16,11 +16,11 @@ local function parse(content)
                 newline = not register
             else
                 if register == 'A' then
-                    registers[4] = tonumber(num)
+                    registers[A] = tonumber(num)
                 elseif register == 'B' then
-                    registers[5] = tonumber(num)
+                    registers[B] = tonumber(num)
                 elseif register == 'C' then
-                    registers[6] = tonumber(num)
+                    registers[C] = tonumber(num)
                 else
                     assert(false, "Unknown register: " .. register)
                 end
@@ -46,8 +46,8 @@ local function read(register, operand)
 end
 
 function handle(opcode, operand, register, result)
-    if opcode == 0 then -- division store in register A
-        register[A] =  math.floor(register[A] / (2 ^ read(register, operand)))
+    if opcode == 0 then     -- division store in register A
+        register[A] = math.floor(register[A] / (2 ^ read(register, operand)))
     elseif opcode == 1 then -- bitwise XOR
         register[B] = register[B] ~ operand
     elseif opcode == 2 then -- modulus
@@ -59,14 +59,30 @@ function handle(opcode, operand, register, result)
     elseif opcode == 5 then -- output
         table.insert(result, read(register, operand) % 8)
     elseif opcode == 6 then -- division store in register B
-        register[B] =  math.floor(register[A] / (2 ^ read(register, operand)))
+        register[B] = math.floor(register[A] / (2 ^ read(register, operand)))
     elseif opcode == 7 then -- division store in register C
-        register[C] =  math.floor(register[A] / (2 ^ read(register, operand)))
+        register[C] = math.floor(register[A] / (2 ^ read(register, operand)))
     else
         assert(false, "A valid program should not use opcode 8")
     end
 
     return false, 0
+end
+
+local function matches(result, program)
+    local result_size = #result
+    local program_size = #program
+
+    while result_size > 0 do
+        if result[result_size] ~= program[program_size] then
+            return false
+        end
+
+        result_size = result_size - 1
+        program_size = program_size - 1
+    end
+
+    return true
 end
 
 function Day17.part1(content)
@@ -88,5 +104,32 @@ function Day17.part1(content)
     return table.concat(result, ",")
 end
 
-return Day17
+function Day17.part2(content)
+    local registers, program = parse(content)
 
+    for x = 0, (8 ^ #program), 1 do
+        registers[A] = x
+        local result = {}
+        local pointer = 0
+
+        while pointer <= #program do
+            local opcode = program[pointer]
+            local operand = program[pointer + 1]
+            local succss, ptr = handle(opcode, operand, registers, result)
+            if succss then
+                pointer = ptr
+            else
+                pointer = pointer + 2
+            end
+        end
+
+        if matches(result, program) then
+            if #result == #program then
+                return x
+            end
+            x = (x * 8) - 1
+        end
+    end
+end
+
+return Day17
