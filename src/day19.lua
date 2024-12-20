@@ -22,15 +22,30 @@ local function parse(content)
     return patterns, designs
 end
 
-local function pattern_matches_design(patterns, design, idx)
+local function memoize(fn)
+    local cache = {}
+
+    local memoized = function(...)
+        local args = {...}
+        local key = args[3] .. args[4]
+        if cache[key] == nil then
+            cache[key] = fn(...)
+        end
+        return cache[key]
+    end
+
+    return memoized
+end
+
+local function pattern_matches_design(self, patterns, design, idx, sum)
     -- if the design is empty, then it's a match
     if string.len(design) == 0 then
-        return true
+        return 1
     end
 
     -- if there are no patterns left, then no pattern matches the design
     if idx > #patterns then
-        return false
+        return 0
     end
 
     local pattern = patterns[idx]
@@ -38,21 +53,34 @@ local function pattern_matches_design(patterns, design, idx)
 
     -- if the pattern matches the start of the design, then continue checking the rest of the design
     if pattern == string.sub(design, 1, pattern_len) then
-        return pattern_matches_design(patterns, string.sub(design, pattern_len + 1), 1) or pattern_matches_design(patterns, design, idx + 1)
+        return self(self, patterns, string.sub(design, pattern_len + 1), 1, sum) + self(self, patterns, design, idx + 1, sum)
     end
 
     -- if the pattern doesn't match the start of the design, then try the next pattern
-    return pattern_matches_design(patterns, design, idx + 1)
+    return self(self, patterns, design, idx + 1, sum)
 end
 
 function Day19.part1(content)
     local patterns, designs = parse(content)
     local count = 0
 
+    local memoize_pattern_matches_design = memoize(pattern_matches_design)
     for _, design in ipairs(designs) do
-        if  pattern_matches_design(patterns, design, 1) then
+        if memoize_pattern_matches_design(memoize_pattern_matches_design, patterns, design, 1, 0) > 0 then
             count = count + 1
         end
+    end
+
+    return count
+end
+
+function Day19.part2(content)
+    local patterns, designs = parse(content)
+    local count = 0
+
+    local memoize_pattern_matches_design = memoize(pattern_matches_design)
+    for _, design in ipairs(designs) do
+        count = count + memoize_pattern_matches_design(memoize_pattern_matches_design, patterns, design, 1, 0)
     end
 
     return count
