@@ -14,7 +14,7 @@ end
 
 function TestLibrary.test_part18a()
     local content = readFile("data/day18a.txt")
-    lu.assertEquals(Day18.part1(content, 12, 6), 24)
+    lu.assertEquals(Day18.part1(content, 12, 6), 22)
 end
 
 function TestLibrary.test_part18_1()
