@@ -22,25 +22,27 @@ local function parse(content)
     return patterns, designs
 end
 
-local function pattern_matches_design(pattern, design)
-    if pattern == design then
+local function pattern_matches_design(patterns, design, idx)
+    -- if the design is empty, then it's a match
+    if string.len(design) == 0 then
         return true
     end
 
-    local pattern_len = string.len(pattern)
-    local design_len = string.len(design)
-
-    if pattern_len > design_len then
+    -- if there are no patterns left, then no pattern matches the design
+    if idx > #patterns then
         return false
     end
 
-    local sub = string.sub(design, 1, pattern_len)
+    local pattern = patterns[idx]
+    local pattern_len = string.len(pattern)
 
-    if pattern == sub then
-        return true
+    -- if the pattern matches the start of the design, then continue checking the rest of the design
+    if pattern == string.sub(design, 1, pattern_len) then
+        return pattern_matches_design(patterns, string.sub(design, pattern_len + 1), 1) or pattern_matches_design(patterns, design, idx + 1)
     end
 
-    return false
+    -- if the pattern doesn't match the start of the design, then try the next pattern
+    return pattern_matches_design(patterns, design, idx + 1)
 end
 
 function Day19.part1(content)
@@ -48,21 +50,8 @@ function Day19.part1(content)
     local count = 0
 
     for _, design in ipairs(designs) do
-        local queue = { design }
-
-        while #queue > 0 do
-            local current = table.remove(queue)
-
-            if string.len(current) == 0 then
-                count = count + 1
-                break
-            end
-
-            for _, pattern in ipairs(patterns) do
-                if pattern_matches_design(pattern, current) then
-                    table.insert(queue, string.sub(current, string.len(pattern) + 1))
-                end
-            end
+        if  pattern_matches_design(patterns, design, 1) then
+            count = count + 1
         end
     end
 
