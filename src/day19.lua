@@ -51,7 +51,7 @@ function Day19.part1(content)
         local queue = { design }
 
         while #queue > 0 do
-            local current = table.remove(queue, 1)
+            local current = table.remove(queue)
 
             if string.len(current) == 0 then
                 count = count + 1
