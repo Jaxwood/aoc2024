@@ -17,6 +17,11 @@ function TestLibrary.test_part19a()
     lu.assertEquals(Day19.part1(content), 6)
 end
 
-os.exit(lu.LuaUnit.run())
+function TestLibrary.test_part19_1()
+    lu.skip("Skip test for now")
+    local content = readFile("data/day19.txt")
+    lu.assertEquals(Day19.part1(content), 6)
+end
 
+os.exit(lu.LuaUnit.run())
 
