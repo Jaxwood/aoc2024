@@ -14,7 +14,7 @@ description = {
 dependencies = {
     "lua >= 5.4",
     "luaunit >= 3.4",
-    "binaryheap >= 0.4.1"
+    "binaryheap >= 0.4"
 }
 
 build = {
