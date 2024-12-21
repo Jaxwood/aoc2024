@@ -50,11 +50,8 @@ local function serialize(x, y)
 end
 
 local function deserialize(key)
-    local parts = {}
-    for part in string.gmatch(key, "(%d+)") do
-        table.insert(parts, part)
-    end
-    return tonumber(parts[1]), tonumber(parts[2])
+    local x, y = key:match("(%d+)_(%d+)")
+    return tonumber(x), tonumber(y)
 end
 
 function Day20.part1(content)
