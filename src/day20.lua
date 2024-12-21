@@ -1,5 +1,4 @@
 local binaryheap = require 'binaryheap'
-local unvisited = binaryheap.minUnique()
 
 local Day20 = {}
 
@@ -54,28 +53,14 @@ local function deserialize(key)
     return tonumber(x), tonumber(y)
 end
 
-function Day20.part1(content)
-    local racetrack, from, to = parse(content)
-
-    -- initialize the score and unvisited list
-    for y, row in ipairs(racetrack) do
-        for x, cell in ipairs(row) do
-            if cell == 1 then
-                unvisited:insert(math.huge, serialize(x, y))
-            end
-            if x == from[1] and y == from[2] then
-                unvisited:update(serialize(x, y), 0)
-            end
-        end
-    end
-
-    -- Dijkstra's algorithm
+-- Dijkstra's algorithm
+local function dijkstra(unvisited, destination)
     while unvisited:peek() do
         local current, distance = unvisited:peek()
         unvisited:remove(current)
 
         -- check if we reached the destination
-        if current == serialize(to[1], to[2]) then
+        if current == destination then
             return distance
         end
 
@@ -94,6 +79,26 @@ function Day20.part1(content)
     end
 
     assert(false, "No path found")
+end
+
+function Day20.part1(content)
+    local racetrack, from, to = parse(content)
+    local destination = serialize(to[1], to[2])
+    local unvisited = binaryheap.minUnique()
+
+    -- initialize the unvisited list
+    for y, row in ipairs(racetrack) do
+        for x, cell in ipairs(row) do
+            if cell == 1 then
+                unvisited:insert(math.huge, serialize(x, y))
+            end
+            if x == from[1] and y == from[2] then
+                unvisited:update(serialize(x, y), 0)
+            end
+        end
+    end
+
+    return dijkstra(unvisited, destination)
 end
 
 return Day20
