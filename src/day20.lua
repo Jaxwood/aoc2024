@@ -55,6 +55,8 @@ end
 
 -- Dijkstra's algorithm
 local function dijkstra(unvisited, destination)
+    local first, _ = unvisited:peek()
+
     while unvisited:peek() do
         local current, distance = unvisited:peek()
         unvisited:remove(current)
@@ -81,9 +83,7 @@ local function dijkstra(unvisited, destination)
     assert(false, "No path found")
 end
 
-function Day20.part1(content)
-    local racetrack, from, to = parse(content)
-    local destination = serialize(to[1], to[2])
+local function create_track(racetrack, from)
     local unvisited = binaryheap.minUnique()
 
     -- initialize the unvisited list
@@ -92,13 +92,63 @@ function Day20.part1(content)
             if cell == 1 then
                 unvisited:insert(math.huge, serialize(x, y))
             end
+
+            -- update the starting point in the unvisited list
             if x == from[1] and y == from[2] then
                 unvisited:update(serialize(x, y), 0)
             end
         end
     end
 
-    return dijkstra(unvisited, destination)
+    return unvisited
+end
+
+function Day20.part1(content)
+    local racetrack, from, to = parse(content)
+    local destination = serialize(to[1], to[2])
+    local cheats = {}
+    local times = {}
+
+    -- find the shortest path to the destination
+    -- track all the nodes in the path
+    local track = create_track(racetrack, from)
+    local path_length = dijkstra(track, destination)
+
+    -- find all walls can be used as a cheat
+    for y, row in ipairs(racetrack) do
+        for x, cell in ipairs(row) do
+            if cell == 2 and x > 1 and x < #row and y > 1 and y < #racetrack then
+                local up = y - 1
+                local down = y + 1
+                local left = x - 1
+                local right = x + 1
+                if (racetrack[up][x] == 1 and racetrack[down][x] == 1) or (racetrack[y][left] == 1 and racetrack[y][right] == 1) then
+                    table.insert(cheats, { x, y })
+                end
+            end
+        end
+    end
+
+    local total = 0
+
+    -- try each cheat and update the distance to the destination
+    for i, cheat in ipairs(cheats) do
+        local copy = create_track(racetrack, from)
+        local x, y = cheat[1], cheat[2]
+        local key = serialize(x, y)
+        copy:insert(math.huge, key)
+        local distance = dijkstra(copy, destination)
+        local idx = tostring(path_length - distance)
+        if not times[idx] then
+            times[idx] = 0
+        end
+        times[idx] = times[idx] + 1
+        if (path_length - distance) >= 100 then
+            total = total + 1
+        end
+    end
+
+    return total
 end
 
 return Day20

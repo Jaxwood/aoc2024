@@ -14,12 +14,12 @@ end
 
 function TestLibrary.test_part20a()
     local content = readFile("data/day20a.txt")
-    lu.assertEquals(Day20.part1(content), 84)
+    lu.assertEquals(Day20.part1(content), 0)
 end
 
 function TestLibrary.test_part20_1()
     local content = readFile("data/day20.txt")
-    lu.assertEquals(Day20.part1(content), 9316)
+    lu.assertEquals(Day20.part1(content), 1293)
 end
 
 os.exit(lu.LuaUnit.run())
