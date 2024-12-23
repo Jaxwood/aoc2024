@@ -55,7 +55,9 @@ end
 
 -- Dijkstra's algorithm
 local function dijkstra(unvisited, destination)
-    local first, _ = unvisited:peek()
+    local cost = {}
+    local from, val = unvisited:peek()
+    cost[from] = val
 
     while unvisited:peek() do
         local current, distance = unvisited:peek()
@@ -63,7 +65,7 @@ local function dijkstra(unvisited, destination)
 
         -- check if we reached the destination
         if current == destination then
-            return distance
+            return cost
         end
 
         -- update the distance of the neighbors
@@ -75,6 +77,7 @@ local function dijkstra(unvisited, destination)
                 local current_dist = unvisited:valueByPayload(key)
                 if current_dist > new_distance then
                     unvisited:update(key, new_distance)
+                    cost[key] = new_distance
                 end
             end
         end
@@ -83,7 +86,9 @@ local function dijkstra(unvisited, destination)
     assert(false, "No path found")
 end
 
-local function create_track(racetrack, from)
+function Day20.part1(content)
+    local racetrack, from, to = parse(content)
+    local destination = serialize(to[1], to[2])
     local unvisited = binaryheap.minUnique()
 
     -- initialize the unvisited list
@@ -100,51 +105,36 @@ local function create_track(racetrack, from)
         end
     end
 
-    return unvisited
-end
+    -- find the cost of each node to reach the destination
+    local cost = dijkstra(unvisited, destination)
 
-function Day20.part1(content)
-    local racetrack, from, to = parse(content)
-    local destination = serialize(to[1], to[2])
-    local cheats = {}
-    local times = {}
-
-    -- find the shortest path to the destination
-    -- track all the nodes in the path
-    local track = create_track(racetrack, from)
-    local path_length = dijkstra(track, destination)
-
+    local total = 0
     -- find all walls can be used as a cheat
     for y, row in ipairs(racetrack) do
         for x, cell in ipairs(row) do
+            -- check if the cell is a wall
             if cell == 2 and x > 1 and x < #row and y > 1 and y < #racetrack then
+
                 local up = y - 1
                 local down = y + 1
+                -- check if the wall can be used as a cheat in the vertical direction
+                if (racetrack[up][x] == 1 and racetrack[down][x] == 1) then
+                    local diff = math.abs(cost[serialize(x, down)] - cost[serialize(x, up)]) - 2
+                    if diff >= 100 then
+                        total = total + 1
+                    end
+                end
+
                 local left = x - 1
                 local right = x + 1
-                if (racetrack[up][x] == 1 and racetrack[down][x] == 1) or (racetrack[y][left] == 1 and racetrack[y][right] == 1) then
-                    table.insert(cheats, { x, y })
+                -- check if the wall can be used as a cheat in the horizontal direction
+                if (racetrack[y][left] == 1 and racetrack[y][right] == 1) then
+                    local diff = math.abs(cost[serialize(left, y)] - cost[serialize(right, y)]) - 2
+                    if diff >= 100 then
+                        total = total + 1
+                    end
                 end
             end
-        end
-    end
-
-    local total = 0
-
-    -- try each cheat and update the distance to the destination
-    for i, cheat in ipairs(cheats) do
-        local copy = create_track(racetrack, from)
-        local x, y = cheat[1], cheat[2]
-        local key = serialize(x, y)
-        copy:insert(math.huge, key)
-        local distance = dijkstra(copy, destination)
-        local idx = tostring(path_length - distance)
-        if not times[idx] then
-            times[idx] = 0
-        end
-        times[idx] = times[idx] + 1
-        if (path_length - distance) >= 100 then
-            total = total + 1
         end
     end
 
@@ -152,4 +142,3 @@ function Day20.part1(content)
 end
 
 return Day20
-
