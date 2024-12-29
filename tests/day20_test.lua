@@ -14,13 +14,12 @@ end
 
 function TestLibrary.test_part20a()
     local content = readFile("data/day20a.txt")
-    lu.assertEquals(Day20.part1(content, 2, 0), 296)
+    lu.assertEquals(Day20.part1(content, 2, 0), 211)
 end
 
 function TestLibrary.test_part20b()
-    lu.skip("")
     local content = readFile("data/day20a.txt")
-    lu.assertEquals(Day20.part1(content, 20, 50), 94)
+    lu.assertEquals(Day20.part1(content, 20, 50), 285)
 end
 
 function TestLibrary.test_part20_1()
@@ -29,11 +28,8 @@ function TestLibrary.test_part20_1()
 end
 
 function TestLibrary.test_part20_2()
-    lu.skip("")
     local content = readFile("data/day20.txt")
-    lu.assertEquals(Day20.part1(content, 20, 100), 9309323)
-    -- too low 669460
-    -- too high 9309323
+    lu.assertEquals(Day20.part1(content, 20, 100), 977747)
 end
 
 os.exit(lu.LuaUnit.run())
