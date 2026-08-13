@@ -4,9 +4,18 @@ local WALL = 1
 local OPEN = 2
 
 local EAST = 1
-local WEST = 2
-local NORTH = 3
-local SOUTH = 4
+local SOUTH = 2
+local WEST = 3
+local NORTH = 4
+
+local DIRS = {
+    [EAST] = { dx = 1, dy = 0 },
+    [SOUTH] = { dx = 0, dy = 1 },
+    [WEST] = { dx = -1, dy = 0 },
+    [NORTH] = { dx = 0, dy = -1 },
+}
+
+local INF = math.huge
 
 local function parse(content)
     local map = {}
@@ -14,10 +23,7 @@ local function parse(content)
     local to = {}
 
     for y, line in ipairs(content) do
-        if not map[y] then
-            map[y] = {}
-        end
-
+        map[y] = {}
         for x = 1, #line do
             local c = line:sub(x, x)
             if c == "S" then
@@ -37,91 +43,185 @@ local function parse(content)
     return map, from, to
 end
 
-local function print_map(map)
-    for y, line in ipairs(map) do
-        local out = ""
-        for x, tile in ipairs(line) do
-            if tile == OPEN then
-                out = out .. "."
-            elseif tile == WALL then
-                out = out .. "#"
+local function is_open(map, x, y)
+    return map[y] ~= nil and map[y][x] == OPEN
+end
+
+local function left_of(facing)
+    return ((facing + 2) % 4) + 1
+end
+
+local function right_of(facing)
+    return (facing % 4) + 1
+end
+
+local function get_dist(dist, x, y, facing)
+    if dist[y] and dist[y][x] and dist[y][x][facing] then
+        return dist[y][x][facing]
+    end
+    return INF
+end
+
+local function set_dist(dist, x, y, facing, value)
+    dist[y] = dist[y] or {}
+    dist[y][x] = dist[y][x] or {}
+    dist[y][x][facing] = value
+end
+
+local function heap_push(heap, item)
+    table.insert(heap, item)
+    local i = #heap
+    while i > 1 do
+        local p = math.floor(i / 2)
+        if heap[p].cost <= heap[i].cost then
+            break
+        end
+        heap[p], heap[i] = heap[i], heap[p]
+        i = p
+    end
+end
+
+local function heap_pop(heap)
+    if #heap == 0 then
+        return nil
+    end
+
+    local root = heap[1]
+    local last = table.remove(heap)
+    if #heap > 0 then
+        heap[1] = last
+        local i = 1
+        while true do
+            local l = i * 2
+            local r = l + 1
+            local smallest = i
+
+            if l <= #heap and heap[l].cost < heap[smallest].cost then
+                smallest = l
+            end
+            if r <= #heap and heap[r].cost < heap[smallest].cost then
+                smallest = r
+            end
+            if smallest == i then
+                break
+            end
+
+            heap[i], heap[smallest] = heap[smallest], heap[i]
+            i = smallest
+        end
+    end
+
+    return root
+end
+
+local function dijkstra(initial_states, neighbors_fn)
+    local dist = {}
+    local heap = {}
+
+    for _, s in ipairs(initial_states) do
+        local old = get_dist(dist, s.x, s.y, s.facing)
+        if s.cost < old then
+            set_dist(dist, s.x, s.y, s.facing, s.cost)
+            heap_push(heap, s)
+        end
+    end
+
+    while #heap > 0 do
+        local current = heap_pop(heap)
+        local best_known = get_dist(dist, current.x, current.y, current.facing)
+        if current.cost == best_known then
+            local neighbors = neighbors_fn(current)
+            for _, next_state in ipairs(neighbors) do
+                local old = get_dist(dist, next_state.x, next_state.y, next_state.facing)
+                if next_state.cost < old then
+                    set_dist(dist, next_state.x, next_state.y, next_state.facing, next_state.cost)
+                    heap_push(heap, next_state)
+                end
             end
         end
-        print(out)
     end
+
+    return dist
 end
 
-local function contains(map, val)
-    for _, v in ipairs(map) do
-        if v.x == val.x and v.y == val.y and v.facing == val.facing then
-            return true
+local function solve(content)
+    local map, from, to = parse(content)
+
+    local function forward_neighbors(current)
+        local out = {}
+        local dir = DIRS[current.facing]
+
+        local nx = current.x + dir.dx
+        local ny = current.y + dir.dy
+        if is_open(map, nx, ny) then
+            table.insert(out, { x = nx, y = ny, facing = current.facing, cost = current.cost + 1 })
+        end
+
+        table.insert(out, { x = current.x, y = current.y, facing = left_of(current.facing), cost = current.cost + 1000 })
+        table.insert(out, { x = current.x, y = current.y, facing = right_of(current.facing), cost = current.cost + 1000 })
+        return out
+    end
+
+    local function reverse_neighbors(current)
+        local out = {}
+        local dir = DIRS[current.facing]
+
+        local px = current.x - dir.dx
+        local py = current.y - dir.dy
+        if is_open(map, px, py) then
+            table.insert(out, { x = px, y = py, facing = current.facing, cost = current.cost + 1 })
+        end
+
+        table.insert(out, { x = current.x, y = current.y, facing = left_of(current.facing), cost = current.cost + 1000 })
+        table.insert(out, { x = current.x, y = current.y, facing = right_of(current.facing), cost = current.cost + 1000 })
+        return out
+    end
+
+    local start_states = {
+        { x = from.x, y = from.y, facing = EAST, cost = 0 },
+    }
+    local dist_start = dijkstra(start_states, forward_neighbors)
+
+    local best = INF
+    for facing = 1, 4 do
+        best = math.min(best, get_dist(dist_start, to.x, to.y, facing))
+    end
+
+    local end_states = {
+        { x = to.x, y = to.y, facing = EAST, cost = 0 },
+        { x = to.x, y = to.y, facing = SOUTH, cost = 0 },
+        { x = to.x, y = to.y, facing = WEST, cost = 0 },
+        { x = to.x, y = to.y, facing = NORTH, cost = 0 },
+    }
+    local dist_end = dijkstra(end_states, reverse_neighbors)
+
+    local tile_count = 0
+    for y = 1, #map do
+        for x = 1, #map[y] do
+            if map[y][x] == OPEN then
+                for facing = 1, 4 do
+                    local a = get_dist(dist_start, x, y, facing)
+                    local b = get_dist(dist_end, x, y, facing)
+                    if a < INF and b < INF and a + b == best then
+                        tile_count = tile_count + 1
+                        break
+                    end
+                end
+            end
         end
     end
 
-    return false
-end
-
--- get the neighbors of the current position
--- we can either move forward at the cost of 1
--- or turn clockwise or counter clockwise at the cost of 1000
-local function get_neighbors(map, current)
-    local neighbors = {}
-    local cost = current.cost
-
-    if current.facing == EAST then
-        if map[current.y][current.x + 1] == OPEN then
-            table.insert(neighbors, { x = current.x + 1, y = current.y, cost = cost + 1, facing = EAST })
-        end
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = NORTH })
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = SOUTH })
-    elseif current.facing == WEST then
-        if map[current.y][current.x - 1] == OPEN then
-            table.insert(neighbors, { x = current.x - 1, y = current.y, cost = cost + 1, facing = WEST })
-        end
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = NORTH })
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = SOUTH })
-    elseif current.facing == NORTH then
-        if map[current.y - 1][current.x] == OPEN then
-            table.insert(neighbors, { x = current.x, y = current.y - 1, cost = cost + 1, facing = NORTH })
-        end
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = EAST })
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = WEST })
-    elseif current.facing == SOUTH then
-        if map[current.y + 1][current.x] == OPEN then
-            table.insert(neighbors, { x = current.x, y = current.y + 1, cost = cost + 1, facing = SOUTH })
-        end
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = EAST })
-        table.insert(neighbors, { x = current.x, y = current.y, cost = cost + 1000, facing = WEST })
-    end
-
-    return neighbors
+    return best, tile_count
 end
 
 function Day16.part1(content)
-    local map, from, to = parse(content)
+    local best = solve(content)
+    return best
+end
 
-    local queue = {}
-    local visited = {}
-    local min = math.huge
-    table.insert(queue, { x = from.x, y = from.y, cost = 0, facing = EAST })
-    table.insert(visited, { x = from.x, y = from.y, facing = EAST })
-
-    while #queue > 0 do
-        table.sort(queue, function(a, b) return a.cost < b.cost end)
-        local current = table.remove(queue, 1)
-        if current.x == to.x and current.y == to.y then
-            min = math.min(min, current.cost)
-        end
-
-        for _, neighbor in ipairs(get_neighbors(map, current)) do
-            if not contains(visited, neighbor) then
-                table.insert(queue, neighbor)
-                table.insert(visited, { x = neighbor.x, y = neighbor.y, facing = neighbor.facing })
-            end
-        end
-    end
-
-    return min
+function Day16.part2(content)
+    local _, tile_count = solve(content)
+    return tile_count
 end
 
 return Day16
